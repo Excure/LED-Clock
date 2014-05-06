@@ -7,6 +7,7 @@
 #include <Adafruit_NeoPixel.h>
 #include <EasingLibrary.h>
 
+#define Brightness 30
 #define UpdateSkips 8
 #define LEDStartDelay 3
 
@@ -86,7 +87,7 @@ void loop()
         {
             for (int i = 0; i < currentDateTime.hour(); i++)
             {
-                strip.setPixelColor(InnerLED(i), 0, 15, 0);
+                strip.setPixelColor(InnerLED(i), 0, Brightness, 0);
             }
         }
         
@@ -94,12 +95,17 @@ void loop()
         {
             for (int i = 0; i < currentDateTime.minute(); i++)
             {
-                strip.setPixelColor(OuterLED(i), 0, 0, 15);
+                strip.setPixelColor(OuterLED(i), 0, 0, Brightness);
             }
         }
         
         if (LEDsEnabled)
-            strip.setPixelColor(OuterLED(previousDateTime.second()), 0, 0, 0);
+        {
+            if (previousDateTime.second() < previousDateTime.minute())
+                strip.setPixelColor(OuterLED(previousDateTime.second()), 0, 0, Brightness);
+            else
+                strip.setPixelColor(OuterLED(previousDateTime.second()), 0, 0, 0);
+        }
         
         unsigned long timeSinceLastTick = millis() - lastSecondMillis;
         
@@ -141,8 +147,6 @@ void loop()
             uint8_t nextSecond = (currentSecond == 59) ? 0 : currentSecond + 1;
             if (LEDsEnabled)
             {
-                uint8_t brightness = 30;
-                
                 double scaledAmount;
                 
                 if (amount <= 0.5)
@@ -150,15 +154,12 @@ void loop()
                 else
                     scaledAmount = 1.0 - ease.easeIn(amount - 0.5);
                 
-                if (currentSecond <= currentDateTime.minute())
-                    strip.setPixelColor(OuterLED(currentSecond), brightness * scaledAmount, 0, 0);
+                double inverseScaledAmount = constrain(1.0 - scaledAmount, 0.0, 100.0);
+                
+                if (currentSecond < currentDateTime.minute())
+                    strip.setPixelColor(OuterLED(currentSecond), Brightness * scaledAmount, 0, Brightness * inverseScaledAmount);
                 else
-                    strip.setPixelColor(OuterLED(currentSecond), brightness * scaledAmount, 0, 0);
-
-//                if (nextSecond <= currentDateTime.minute())
-//                    strip.setPixelColor(OuterLED(nextSecond), brightness * amount, 0, 15 * (1.0 - amount));
-//                else
-//                    strip.setPixelColor(OuterLED(nextSecond), brightness * amount, 0, 0);
+                    strip.setPixelColor(OuterLED(currentSecond), Brightness * scaledAmount, 0, 0);
             }
             strip.show();
             updatesPerSecond++;
