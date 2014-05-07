@@ -6,6 +6,9 @@
 #include <RTC_DS3231.h>
 #include <Adafruit_NeoPixel.h>
 #include <EasingLibrary.h>
+#include "Flash.h"
+#include "StandardCplusplus.h"
+#include <vector>
 
 #define Brightness 30
 #define UpdateSkips 8
@@ -22,12 +25,15 @@ boolean LEDsEnabled = false;
 unsigned long millisPerSecond = 0;
 uint16_t updatesPerSecond = 0;
 
+unsigned long lastUpdateMillis = 0;
 unsigned long lastSecondMillis = 0;
 uint32_t previousUnixTime = 0;
 
 DateTime currentDateTime;
 
 BackEase ease;
+
+std::vector<Flash*> flashes;
 
 uint16_t OuterLED(uint16_t n)
 {
@@ -43,14 +49,15 @@ void setupLEDs()
 {
     strip.begin();
     strip.show();
+    
+    Flash::neoPixels = &strip;
 }
 
 void setup()
 {
-    setupLEDs();
+    Serial.begin(9600);
     
-    ease.setDuration(.5);
-    ease.setTotalChangeInPosition(1);
+    setupLEDs();
     
     lcd.begin(16, 2);
     lcd.print("Lohl");
@@ -82,29 +89,11 @@ void loop()
                 LEDsEnabled = true;
             }
         }
-        
-        if (currentDateTime.hour() != previousDateTime.hour())
-        {
-            for (int i = 0; i < currentDateTime.hour(); i++)
-            {
-                strip.setPixelColor(InnerLED(i), 0, Brightness, 0);
-            }
-        }
-        
-        if (currentDateTime.minute() != previousDateTime.minute())
-        {
-            for (int i = 0; i < currentDateTime.minute(); i++)
-            {
-                strip.setPixelColor(OuterLED(i), 0, 0, Brightness);
-            }
-        }
-        
+
         if (LEDsEnabled)
         {
-            if (previousDateTime.second() < previousDateTime.minute())
-                strip.setPixelColor(OuterLED(previousDateTime.second()), 0, 0, Brightness);
-            else
-                strip.setPixelColor(OuterLED(previousDateTime.second()), 0, 0, 0);
+            Flash* flash = new Flash(OuterLED(currentDateTime.second()), 1.15, Brightness, 0, 0);
+            flashes.push_back(flash);
         }
         
         unsigned long timeSinceLastTick = millis() - lastSecondMillis;
@@ -141,29 +130,33 @@ void loop()
         updateSkipCounter++;
         if (updateSkipCounter == UpdateSkips)
         {
-            unsigned long timeSinceLastTick = millis() - lastSecondMillis;
-            double amount = timeSinceLastTick / ((double)millisPerSecond);
-            uint8_t currentSecond = currentDateTime.second();
-            uint8_t nextSecond = (currentSecond == 59) ? 0 : currentSecond + 1;
+            unsigned long currentMillis = millis();
+            
+            double timeMultiplier = 1000.0 / ((double)millisPerSecond);
+            
+            unsigned long timeSinceLastUpdate = currentMillis - lastUpdateMillis;
+            float time = timeSinceLastUpdate * timeMultiplier / 1000.0;
+
             if (LEDsEnabled)
             {
-                double scaledAmount;
-                
-                if (amount <= 0.5)
-                    scaledAmount = ease.easeOut(amount);
-                else
-                    scaledAmount = 1.0 - ease.easeIn(amount - 0.5);
-                
-                double inverseScaledAmount = constrain(1.0 - scaledAmount, 0.0, 100.0);
-                
-                if (currentSecond < currentDateTime.minute())
-                    strip.setPixelColor(OuterLED(currentSecond), Brightness * scaledAmount, 0, Brightness * inverseScaledAmount);
-                else
-                    strip.setPixelColor(OuterLED(currentSecond), Brightness * scaledAmount, 0, 0);
+                for(std::vector<Flash*>::iterator it = flashes.begin(); it != flashes.end(); )
+                {
+                    Flash* flash = *it;
+                    if (!flash->update(time))
+                    {
+                        it = flashes.erase(it);
+                        delete flash;
+                    }
+                    else
+                    {
+                        ++it;
+                    }
+                }
             }
             strip.show();
             updatesPerSecond++;
             updateSkipCounter = 0;
+            lastUpdateMillis = currentMillis;
         }
     }
 }
