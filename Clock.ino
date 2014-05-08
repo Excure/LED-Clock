@@ -33,7 +33,7 @@ DateTime currentDateTime;
 
 BackEase ease;
 
-std::vector<Flash*> flashes;
+std::vector<Animation*> animations;
 
 uint16_t OuterLED(uint16_t n)
 {
@@ -93,7 +93,7 @@ void loop()
         if (LEDsEnabled)
         {
             Flash* flash = new Flash(OuterLED(currentDateTime.second()), 1.15, Brightness, 0, 0);
-            flashes.push_back(flash);
+            animations.push_back(flash);
         }
         
         unsigned long timeSinceLastTick = millis() - lastSecondMillis;
@@ -139,13 +139,13 @@ void loop()
 
             if (LEDsEnabled)
             {
-                for(std::vector<Flash*>::iterator it = flashes.begin(); it != flashes.end(); )
+                for(std::vector<Animation*>::iterator it = animations.begin(); it != animations.end(); )
                 {
-                    Flash* flash = *it;
-                    if (!flash->update(time))
+                    Animation* animation = *it;
+                    if (!animation->update(time))
                     {
-                        it = flashes.erase(it);
-                        delete flash;
+                        it = animations.erase(it);
+                        delete animation;
                     }
                     else
                     {
