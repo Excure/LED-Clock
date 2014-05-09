@@ -14,7 +14,8 @@
 #include "FadeIn.h"
 
 #define TimeOffset 0
-#define Brightness 30
+#define BaseBrightness 30
+#define HighlightBrightness 60
 #define UpdateSkips 8
 #define LEDStartDelay 3
 #define MinuteAnimationDelay 0.06
@@ -97,15 +98,15 @@ void setupLEDs()
     strip.begin();
     strip.show();
     
-    zeroColor = strip.Color(30, 30, 30);
-    quarterDayColor = strip.Color(11, 60, 11);
-    hourColor = strip.Color(0, 30, 0);
-    hourAnimationColor = strip.Color(0, 60, 0);
-    minuteColor = strip.Color(0, 0, 30);
-    minuteAnimationColor = strip.Color(0, 30, 60);
+    zeroColor = strip.Color(BaseBrightness, BaseBrightness, BaseBrightness);
+    quarterDayColor = strip.Color(0.36 * BaseBrightness, HighlightBrightness, 0.36 * BaseBrightness);
+    hourColor = strip.Color(0, BaseBrightness, 0);
+    hourAnimationColor = strip.Color(0, HighlightBrightness, 0);
+    minuteColor = strip.Color(0, 0, BaseBrightness);
+    minuteAnimationColor = strip.Color(0, BaseBrightness, HighlightBrightness);
     quarterHourColor = minuteAnimationColor;
-    secondColor = strip.Color(30, 0, 0);
-    
+    secondColor = strip.Color(BaseBrightness, 0, 0);
+
     Flash::neoPixels = &strip;
 }
 
