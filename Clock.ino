@@ -13,7 +13,7 @@
 #include <MemoryFree.h>
 #include "FadeIn.h"
 
-#define TimeOffset -163 * 60
+#define TimeOffset 0
 #define Brightness 30
 #define UpdateSkips 8
 #define LEDStartDelay 3
