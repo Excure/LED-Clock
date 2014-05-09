@@ -12,11 +12,12 @@ protected:
     uint8_t led;
     float timer;
     float duration;
+    float delay;
     virtual void updateAnimation(float amount) = 0;
 public:
     static Adafruit_NeoPixel *neoPixels;
     bool done;
-    Animation(uint8_t ledNumber, float duration);
+    Animation(uint8_t ledNumber, float duration, float delay = 0);
     bool update(float time);
 };
 

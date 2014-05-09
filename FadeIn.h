@@ -3,11 +3,11 @@
 #include <EasingLibrary.h>
 #include "Animation.h"
 
-#ifndef Flash_h
+#ifndef FadeIn_h
 
-#define Flash_h
+#define FadeIn_h
 
-class Flash : public Animation
+class FadeIn : public Animation
 {
 private:
     QuinticEase ease;
@@ -20,8 +20,7 @@ private:
     uint8_t fadeG;
     uint8_t fadeB;
 public:
-    Flash(uint8_t ledNumber, float duration, uint8_t r, uint8_t g, uint8_t b, float delay = 0);
-    Flash(uint8_t ledNumber, float duration, uint32_t color, float delay = 0);
+    FadeIn(uint8_t ledNumber, float duration, uint32_t color, float delay = 0);
     void updateAnimation(float amount);
 };
 
