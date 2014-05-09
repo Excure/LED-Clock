@@ -43,6 +43,7 @@ uint32_t minuteColor;
 uint32_t minuteAnimationColor;
 uint32_t hourAnimationColor;
 uint32_t quarterHourColor;
+uint32_t fiveMinuteColor;
 uint32_t secondColor;
 
 DateTime currentDateTime;
@@ -73,9 +74,16 @@ uint32_t colorForMinute(uint8_t minute)
     if (minute == 0)
         return zeroColor;
     else if (minute > currentDateTime.minute())
-        return 0;
+    {
+        if ((minute % 15) == 0)
+            return zeroColor;
+        else
+            return 0;
+    }
     else if ((minute % 15) == 0)
         return quarterHourColor;
+    else if ((minute % 5) == 0)
+        return fiveMinuteColor;
     else
         return minuteColor;
 }
@@ -85,7 +93,12 @@ uint32_t colorForHour(uint8_t hour)
     if (hour == 0)
         return zeroColor;
     else if (hour > currentDateTime.hour())
-        return 0;
+    {
+        if ((hour % 6) == 0)
+            return zeroColor;
+        else
+            return 0;
+    }
     else if ((hour % 6) == 0)
         return quarterDayColor;
     else
@@ -98,13 +111,14 @@ void setupLEDs()
     strip.begin();
     strip.show();
     
-    zeroColor = strip.Color(BaseBrightness, BaseBrightness, BaseBrightness);
+    zeroColor = strip.Color(BaseBrightness * 0.25, BaseBrightness * 0.25, BaseBrightness * 0.25);
     quarterDayColor = strip.Color(0.36 * BaseBrightness, HighlightBrightness, 0.36 * BaseBrightness);
     hourColor = strip.Color(0, BaseBrightness, 0);
     hourAnimationColor = strip.Color(0, HighlightBrightness, 0);
     minuteColor = strip.Color(0, 0, BaseBrightness);
     minuteAnimationColor = strip.Color(0, BaseBrightness, HighlightBrightness);
     quarterHourColor = minuteAnimationColor;
+    fiveMinuteColor = strip.Color(0, BaseBrightness * 0.5, HighlightBrightness * 0.5);
     secondColor = strip.Color(BaseBrightness, 0, 0);
 
     Flash::neoPixels = &strip;
@@ -133,12 +147,12 @@ void setup()
     DateTime now = RTC.now();
     now = DateTime(now.unixtime() + TimeOffset);
     currentDateTime = now;
-    for (int i = 1; i < now.minute() + 1; i++)
+    for (int i = 1; i < 60; i++)
     {
         strip.setPixelColor(OuterLED(i), colorForMinute(i));
     }
     
-    for (int i = 1; i < now.hour() + 1; i++)
+    for (int i = 1; i < 24; i++)
     {
         strip.setPixelColor(InnerLED(i), colorForHour(i));
     }
