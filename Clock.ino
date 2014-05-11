@@ -55,7 +55,7 @@ uint8_t currentAnimationMinute = 0;
 int8_t minuteAnimationDirection = 1;
 float minuteAnimationTimer = 0;
 
-float previousBrightness = 0;
+int previousRawBrightness = 0;
 float brightness = 1;
 
 float hourAnimationTimer = 0;
@@ -115,7 +115,7 @@ uint32_t colorForHour(uint8_t hour)
 void regenerateColors()
 {
     zeroColor = strip.Color(BaseBrightness * 0.25 * brightness, BaseBrightness * 0.25 * brightness, BaseBrightness * 0.25 * brightness);
-    quarterDayColor = strip.Color(0.36 * BaseBrightness * brightness, HighlightBrightness * brightness, 0.36 * BaseBrightness * brightness);
+    quarterDayColor = strip.Color(0.25 * BaseBrightness * brightness, HighlightBrightness * brightness, 0.25 * BaseBrightness * brightness);
     hourColor = strip.Color(0, BaseBrightness * brightness, 0);
     hourAnimationColor = strip.Color(0, HighlightBrightness * brightness, 0);
     minuteColor = strip.Color(0, 0, BaseBrightness * brightness);
@@ -139,6 +139,8 @@ void setupLEDs()
 
 void setup()
 {
+    Serial.begin(9600);
+    
     setupLEDs();
     
     lcd.begin(16, 2);
@@ -180,9 +182,15 @@ void loop()
     uint32_t unixTime = now.unixtime();
     
     int rawBrightness = analogRead(A0);
-    brightness = ((float)rawBrightness) / 1023.0f;
-    if (brightness != previousBrightness)
+    if (abs(rawBrightness - previousRawBrightness) > 2) // Compensate for jitter
     {
+        brightness = ((float)rawBrightness) / 1023.0f;
+        
+        Serial.print("Brightness changed from: ");
+        Serial.print(previousRawBrightness);
+        Serial.print(" to: ");
+        Serial.println(rawBrightness);
+        
         regenerateColors();
         for (int i = 0; i < 60; i++)
         {
@@ -192,8 +200,8 @@ void loop()
         {
             strip.setPixelColor(InnerLED(i), colorForHour(i));
         }
+        previousRawBrightness = rawBrightness;
     }
-    previousBrightness = brightness;
     
     if (unixTime != previousUnixTime)
     {
@@ -219,6 +227,16 @@ void loop()
             
             if (currentDateTime.minute() != previousDateTime.minute())
             {
+                if ((currentDateTime.minute() % 15) == 0)
+                {
+                    int quarter = currentDateTime.minute() / 15;
+                    if (quarter != 3)
+                    {
+                        int minuteOfNextQuarter = (quarter + 1) * 15;
+                        FadeIn *fadeIn = new FadeIn(OuterLED(minuteOfNextQuarter), 0.5, colorForMinute(minuteOfNextQuarter));
+                        animations.push_back(fadeIn);
+                    }
+                }
                 if (currentDateTime.minute() == 0)
                 {
                     minuteAnimationTimer = ReverseMinuteAnimationDelay;
@@ -242,6 +260,16 @@ void loop()
             
             if (currentDateTime.hour() != previousDateTime.hour())
             {
+                if ((currentDateTime.hour() % 6) == 0)
+                {
+                    int quarter = currentDateTime.hour() / 6;
+                    if (quarter != 3)
+                    {
+                        int hourOfNextQuarter = (quarter + 1) * 6;
+                        FadeIn *fadeIn = new FadeIn(InnerLED(hourOfNextQuarter), 0.5, colorForHour(hourOfNextQuarter));
+                        animations.push_back(fadeIn);
+                    }
+                }
                 if (currentDateTime.hour() == 0)
                 {
                     hourAnimationTimer = 0.25;
