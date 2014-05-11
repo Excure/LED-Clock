@@ -78,7 +78,9 @@ uint32_t colorForMinute(uint8_t minute)
         return zeroColor;
     else if (minute > currentDateTime.minute())
     {
-        if ((minute % 15) == 0)
+        int currentQuarter = currentDateTime.minute() / 15;
+        int targetQuarter = minute / 15;
+        if ((minute % 15) == 0 && (targetQuarter - currentQuarter) == 1)
             return zeroColor;
         else
             return 0;
@@ -97,7 +99,9 @@ uint32_t colorForHour(uint8_t hour)
         return zeroColor;
     else if (hour > currentDateTime.hour())
     {
-        if ((hour % 6) == 0)
+        int currentQuarter = currentDateTime.hour() / 6;
+        int targetQuarter = hour / 6;
+        if ((hour % 6) == 0 && (targetQuarter - currentQuarter) == 1)
             return zeroColor;
         else
             return 0;
