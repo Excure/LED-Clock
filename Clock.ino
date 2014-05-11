@@ -14,8 +14,8 @@
 #include "FadeIn.h"
 
 #define TimeOffset 0
-#define BaseBrightness 30
-#define HighlightBrightness 60
+#define BaseBrightness 127
+#define HighlightBrightness 255
 #define UpdateSkips 8
 #define LEDStartDelay 3
 #define MinuteAnimationDelay 0.06
@@ -54,6 +54,9 @@ QuinticEase easeIn;
 uint8_t currentAnimationMinute = 0;
 int8_t minuteAnimationDirection = 1;
 float minuteAnimationTimer = 0;
+
+float previousBrightness = 0;
+float brightness = 1;
 
 float hourAnimationTimer = 0;
 
@@ -105,21 +108,27 @@ uint32_t colorForHour(uint8_t hour)
         return hourColor;
 }
 
+void regenerateColors()
+{
+    zeroColor = strip.Color(BaseBrightness * 0.25 * brightness, BaseBrightness * 0.25 * brightness, BaseBrightness * 0.25 * brightness);
+    quarterDayColor = strip.Color(0.36 * BaseBrightness * brightness, HighlightBrightness * brightness, 0.36 * BaseBrightness * brightness);
+    hourColor = strip.Color(0, BaseBrightness * brightness, 0);
+    hourAnimationColor = strip.Color(0, HighlightBrightness * brightness, 0);
+    minuteColor = strip.Color(0, 0, BaseBrightness * brightness);
+    minuteAnimationColor = strip.Color(0, BaseBrightness * brightness, HighlightBrightness * brightness);
+    quarterHourColor = minuteAnimationColor;
+    fiveMinuteColor = strip.Color(0, BaseBrightness * 0.5 * brightness, HighlightBrightness * 0.5 * brightness);
+    secondColor = strip.Color(BaseBrightness * brightness, 0, 0);
+}
 
 void setupLEDs()
 {
     strip.begin();
     strip.show();
     
-    zeroColor = strip.Color(BaseBrightness * 0.25, BaseBrightness * 0.25, BaseBrightness * 0.25);
-    quarterDayColor = strip.Color(0.36 * BaseBrightness, HighlightBrightness, 0.36 * BaseBrightness);
-    hourColor = strip.Color(0, BaseBrightness, 0);
-    hourAnimationColor = strip.Color(0, HighlightBrightness, 0);
-    minuteColor = strip.Color(0, 0, BaseBrightness);
-    minuteAnimationColor = strip.Color(0, BaseBrightness, HighlightBrightness);
-    quarterHourColor = minuteAnimationColor;
-    fiveMinuteColor = strip.Color(0, BaseBrightness * 0.5, HighlightBrightness * 0.5);
-    secondColor = strip.Color(BaseBrightness, 0, 0);
+    pinMode(A0, INPUT);
+    
+    regenerateColors();
 
     Flash::neoPixels = &strip;
 }
@@ -165,6 +174,22 @@ void loop()
     now = DateTime(now.unixtime() + TimeOffset);
     
     uint32_t unixTime = now.unixtime();
+    
+    int rawBrightness = analogRead(A0);
+    brightness = ((float)rawBrightness) / 1023.0f;
+    if (brightness != previousBrightness)
+    {
+        regenerateColors();
+        for (int i = 0; i < 60; i++)
+        {
+            strip.setPixelColor(OuterLED(i), colorForMinute(i));
+        }
+        for (int i = 0; i < 24; i++)
+        {
+            strip.setPixelColor(InnerLED(i), colorForHour(i));
+        }
+    }
+    previousBrightness = brightness;
     
     if (unixTime != previousUnixTime)
     {
@@ -230,13 +255,20 @@ void loop()
         char time[9];
         snprintf(time, 9, "%02d:%02d:%02d", now.hour(), now.minute(), now.second());
         
-        char date[11];
-        snprintf(date, 11, "%02d.%02d.%04d", now.day(), now.month(), now.year());
+//        char date[11];
+//        snprintf(date, 11, "%02d.%02d.%04d", now.day(), now.month(), now.year());
+        
+        char brightnessString[5];
+        brightnessString[3] = ' ';
+        brightnessString[4] = '\0';
+        
+        snprintf(brightnessString, 5, "%d%%", ((int)(brightness * 100.0f)));
         
         lcd.setCursor(0,0);
         lcd.print(time);
         lcd.setCursor(0,1);
-        lcd.print(date);
+        lcd.print(brightnessString);
+        lcd.print("   ");
         
         char ms[6];
         snprintf(ms, 6, "%dms", timeSinceLastTick);
@@ -265,7 +297,7 @@ void loop()
             
             unsigned long timeSinceLastUpdate = currentMillis - lastUpdateMillis;
             float time = timeSinceLastUpdate * timeMultiplier / 1000.0;
-
+            
             if (hourAnimationTimer > 0)
             {
                 hourAnimationTimer -= time;
