@@ -114,14 +114,14 @@ uint32_t colorForHour(uint8_t hour)
 
 void regenerateColors()
 {
-    zeroColor = strip.Color(BaseBrightness * 0.25 * brightness, BaseBrightness * 0.25 * brightness, BaseBrightness * 0.25 * brightness);
+    zeroColor = strip.Color(BaseBrightness * 0.50 * brightness, BaseBrightness * 0.50 * brightness, BaseBrightness * 0.50 * brightness);
     quarterDayColor = strip.Color(0.25 * BaseBrightness * brightness, HighlightBrightness * brightness, 0.25 * BaseBrightness * brightness);
     hourColor = strip.Color(0, BaseBrightness * brightness, 0);
     hourAnimationColor = strip.Color(0, HighlightBrightness * brightness, 0);
-    minuteColor = strip.Color(0, 0, BaseBrightness * brightness);
-    minuteAnimationColor = strip.Color(0, BaseBrightness * brightness, HighlightBrightness * brightness);
+    minuteColor = strip.Color(0, 0.625 * BaseBrightness * brightness, BaseBrightness * brightness);
+    minuteAnimationColor = strip.Color(0, 0.625 * HighlightBrightness * brightness, HighlightBrightness * brightness);
     quarterHourColor = minuteAnimationColor;
-    fiveMinuteColor = strip.Color(0, BaseBrightness * 0.5 * brightness, HighlightBrightness * 0.5 * brightness);
+    fiveMinuteColor = strip.Color(0, 0.625 * BaseBrightness * brightness * 1.5, BaseBrightness * brightness * 1.5);
     secondColor = strip.Color(BaseBrightness * brightness, 0, 0);
 }
 
