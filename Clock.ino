@@ -111,17 +111,21 @@ uint32_t colorForHour(uint8_t hour)
         return hourColor;
 }
 
+uint32_t createColor(float r, float g, float b)
+{
+    return strip.Color(r * brightness * 255, g * brightness * 255, b * brightness * 255);
+}
+
 void regenerateColors()
 {
-    zeroColor = strip.Color(BaseBrightness * 0.50 * brightness, BaseBrightness * 0.50 * brightness, BaseBrightness * 0.50 * brightness);
-    quarterDayColor = strip.Color(0.25 * BaseBrightness * brightness, HighlightBrightness * brightness, 0.25 * BaseBrightness * brightness);
-    hourColor = strip.Color(0, BaseBrightness * brightness, 0);
-    hourAnimationColor = strip.Color(0, HighlightBrightness * brightness, 0);
-    minuteColor = strip.Color(0, 0.625 * BaseBrightness * brightness, BaseBrightness * brightness);
-    minuteAnimationColor = strip.Color(0, 0.625 * HighlightBrightness * brightness, HighlightBrightness * brightness);
-    quarterHourColor = minuteAnimationColor;
-    fiveMinuteColor = strip.Color(0, 0.625 * BaseBrightness * brightness * 1.5, BaseBrightness * brightness * 1.5);
-    secondColor = strip.Color(BaseBrightness * brightness, 0, 0);
+    zeroColor = createColor(0.25, 0.25, 0.25);
+    quarterDayColor = createColor(0.125, 1, 0.125);
+    hourColor = createColor(0, 0.5, 0);
+    hourAnimationColor = createColor(0, 1, 0);
+    minuteColor = createColor(0, 0.3125, 0.5);
+    minuteAnimationColor = quarterHourColor = createColor(0, 0.625, 1);
+    fiveMinuteColor = createColor(0, 0.5, 0.75);
+    secondColor = createColor(0.5, 0, 0);
 }
 
 void setupLEDs()
