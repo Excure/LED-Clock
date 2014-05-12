@@ -24,8 +24,8 @@ private:
     uint8_t targetG;
     uint8_t targetB;
 public:
-    FlashIn(uint8_t ledNumber, float duration, uint8_t flashR, uint8_t flashG, uint8_t flashB, uint8_t targetR, uint8_t targetG, uint8_t targetB, float delay = 0);
-    FlashIn(uint8_t ledNumber, float duration, uint32_t flashColor, uint32_t targetColor, float delay = 0);
+    FlashIn(uint8_t ledNumber, float duration, uint8_t flashR, uint8_t flashG, uint8_t flashB, uint8_t targetR, uint8_t targetG, uint8_t targetB);
+    FlashIn(uint8_t ledNumber, float duration, uint32_t flashColor, uint32_t targetColor);
     void updateAnimation(float amount);
 };
 

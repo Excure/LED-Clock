@@ -6,7 +6,6 @@
 #include <RTC_DS3231.h>
 #include <Adafruit_NeoPixel.h>
 #include <EasingLibrary.h>
-#include "Flash.h"
 #include "FlashIn.h"
 #include "StandardCplusplus.h"
 #include <vector>
@@ -134,7 +133,7 @@ void setupLEDs()
     
     regenerateColors();
 
-    Flash::neoPixels = &strip;
+    Animation::neoPixels = &strip;
 }
 
 void setup()

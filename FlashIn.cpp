@@ -1,6 +1,6 @@
 #include "FlashIn.h"
 
-FlashIn::FlashIn(uint8_t ledNumber, float duration, uint8_t flashR, uint8_t flashG, uint8_t flashB, uint8_t targetR, uint8_t targetG, uint8_t targetB, float delay) : Animation(ledNumber, duration, delay)
+FlashIn::FlashIn(uint8_t ledNumber, float duration, uint8_t flashR, uint8_t flashG, uint8_t flashB, uint8_t targetR, uint8_t targetG, uint8_t targetB) : Animation(ledNumber, duration)
 {
     uint32_t baseColor = neoPixels->getPixelColor(ledNumber);
     
@@ -20,7 +20,7 @@ FlashIn::FlashIn(uint8_t ledNumber, float duration, uint8_t flashR, uint8_t flas
     ease.setTotalChangeInPosition(1);
 }
 
-FlashIn::FlashIn(uint8_t ledNumber, float duration, uint32_t flashColor, uint32_t targetColor, float delay) : Animation(ledNumber, duration, delay)
+FlashIn::FlashIn(uint8_t ledNumber, float duration, uint32_t flashColor, uint32_t targetColor) : Animation(ledNumber, duration)
 {
     uint32_t baseColor = neoPixels->getPixelColor(ledNumber);
     

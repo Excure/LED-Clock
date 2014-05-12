@@ -20,7 +20,7 @@ private:
     uint8_t fadeG;
     uint8_t fadeB;
 public:
-    FadeIn(uint8_t ledNumber, float duration, uint32_t color, float delay = 0);
+    FadeIn(uint8_t ledNumber, float duration, uint32_t color);
     void updateAnimation(float amount);
 };
 

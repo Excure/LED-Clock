@@ -1,6 +1,6 @@
 #include "FadeIn.h"
 
-FadeIn::FadeIn(uint8_t ledNumber, float duration, uint32_t color, float delay) : Animation(ledNumber, duration, delay)
+FadeIn::FadeIn(uint8_t ledNumber, float duration, uint32_t color) : Animation(ledNumber, duration)
 {
     uint32_t baseColor = neoPixels->getPixelColor(ledNumber);
     
